@@ -12,12 +12,13 @@ st.info("Use only information you are comfortable sending to the OpenAI API. Rev
 job = st.text_area("Job description", height=220, placeholder="Paste the role description...")
 evidence = st.text_area("Your relevant experience", height=220, placeholder="Add projects, skills, and results you can support...")
 
-if st.button("Analyze and draft", type="primary", disabled=not (job.strip() and evidence.strip())):
-    if not os.getenv("OPENAI_API_KEY"):
-        st.error("Set the OPENAI_API_KEY environment variable, then restart the app.")
-        st.stop()
+api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
 
-    client = OpenAI()
+if not api_key:
+    st.error("Configure OPENAI_API_KEY in the app's Secrets.")
+    st.stop()
+
+client = OpenAI(api_key=api_key)
     prompt = f"""Analyze a job description against candidate-provided experience.
 Use only facts explicitly present in the candidate evidence. Never infer or invent qualifications, employers, dates, metrics, or outcomes.
 Return valid JSON with exactly these keys:
